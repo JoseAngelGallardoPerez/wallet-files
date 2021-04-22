@@ -1,0 +1,608 @@
+openapi: 3.0.0
+info:
+  version: "0.0.1"
+  title: Wallet Files Service
+security:
+  - bearerAuth: []
+paths:
+  '/files/private/v1/files/{id}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Files
+      summary: Returns file info by id.
+      description: Includes file path to get file directly.
+      operationId: GetHandler
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/File'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal server error
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Files
+      summary: Deletes file by id.
+      operationId: DeleteHandler
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+      responses:
+        '200':
+          description: Successful request
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal server error
+
+  '/files/private/v1/files/public/{uid}':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Files
+      summary: Uploads public file.
+      description: File associated with user by "uid" and visible for all. Available for admins with "modify_admin_profiles" permission if {uid} belongs to an admin user or "modify_user_profiles" permission if {uid} belongs to a client.
+      operationId: CreatePublicHandler
+      parameters:
+        - name: uid
+          in: path
+          description: The User UID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/File'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '500':
+          description: Internal server error
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+  '/files/private/v1/files/private/{uid}':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Files
+      summary: Uploads private file.
+      description: File associated with user by "uid" and visible for this user and admins. Available for admins with "modify_admin_profiles" permission if {uid} belongs to an admin user or "modify_user_profiles" permission if {uid} belongs to a client.
+      operationId: CreatePrivateHandler
+      parameters:
+        - name: uid
+          in: path
+          description: The User UID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/File'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '500':
+          description: Internal server error
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+  '/files/private/v1/files/admin-only/{uid}':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Files
+      summary: Uploads file visible by admins.
+      description: File associated with user by "uid" and visible for admins. Available for admins with "modify_admin_profiles" permission if {uid} belongs to an admin user or "modify_user_profiles" permission if {uid} belongs to a client.
+      operationId: CreateAdminOnlyHandler
+      parameters:
+        - name: uid
+          in: path
+          description: The User UID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/File'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '500':
+          description: Internal server error
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+  '/files/private/v1/users/{uid}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Files
+      summary: Returns a list of user files by uid. Available for admins with "view_admin_profiles" permission if {uid} belongs to an admin user or "view_user_profiles" permission if {uid} belongs to a client.
+      operationId: GetUserFilesHandler
+      parameters:
+        - name: uid
+          in: path
+          description: UID of an user.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  has_more:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Files'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '500':
+          description: Internal server error
+  /files/private/v1/storage/bin/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Files
+      summary: Returns binary file directly.
+      description: This returns binary file instad of json with file info. Available for admins with "view_admin_profiles" permission if {uid} belongs to an admin user or "view_user_profiles" permission if {uid} belongs to a client.
+      operationId: GetFile
+      parameters:
+        - name: id
+          in: path
+          description: File id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Binary response
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '500':
+          description: Internal server error
+  /files/public/v1/storage/bin/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Files
+      summary: Returns public binary file directly.
+      description: This returns public binary file instad of json with file info.
+      operationId: GetPublicFile
+      parameters:
+        - name: id
+          in: path
+          description: File id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Binary response
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '500':
+          description: Internal server error
+
+  '/files/private/v1/limited/{id}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Limited Files
+      summary: Returns file info by id.
+      description: Includes file path to get file directly.
+      operationId: LimitedGetHandler
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/TmpAuth'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/File'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal server error
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Limited Files
+      summary: Deletes file by id.
+      operationId: LimitedDeleteHandler
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/TmpAuth'
+      responses:
+        '200':
+          description: Successful request
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal server error
+
+  '/files/private/v1/limited/private':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Limited Files
+      summary: Uploads private file.
+      description: File associated with user by "uid" and visible for this user and admins. Available for admins with "modify_admin_profiles" permission if {uid} belongs to an admin user or "modify_user_profiles" permission if {uid} belongs to a client.
+      operationId: LimitedCreatePrivateHandler
+      parameters:
+        - $ref: '#/components/parameters/TmpAuth'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/File'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '500':
+          description: Internal server error
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+  '/files/private/v1/files/profile-image':
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Files
+      summary: Uploads profile image.
+      description:
+      operationId: CreateProfileImageHandler
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/File'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '500':
+          description: Internal server error
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+
+components:
+  schemas:
+    File:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        userId:
+          type: string
+        path:
+          type: string
+        filename:
+          type: string
+        bucket:
+          type: string
+        storage:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+        isPrivate:
+          type: integer
+        isAdminOnly:
+          type: integer
+    Files:
+      type: array
+      items:
+        $ref: '#/components/schemas/File'
+    ForbiddenResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForbiddenError'
+    UnauthorizedResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnauthorizedError'
+    NotFoundResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotFoundError'
+    ForbiddenError:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Forbidden
+    UnauthorizedError:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Unauthorized
+    NotFoundError:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Unauthorized
+  parameters:
+    pathFileId:
+      name: id
+      in: path
+      description: ID of a file.
+      required: true
+      schema:
+        type: integer
+    TmpAuth:
+      in: header
+      name: X-Tmp-Auth
+      description: JWT which provides an access to the "limited" endpoints. This token is in response after signup process.
+      schema:
+        type: string
+      required: true
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
